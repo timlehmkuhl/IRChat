@@ -1,0 +1,21 @@
+welcome(nick, user, host) ::= ":Welcome to to the Internet Relay Network <nick>!<user>@<host>"
+
+ERR_NONICKNAMEGIVEN() ::=":No nickname given"
+
+ERR_NICKNAMEINUSE(nick) ::=":Nickname <nick> is is already in use"
+
+changenick(nick) ::= ":Changed nick to <nick>"
+
+ERR_ALREADYREGISTRED() ::=":Unauthorized command (already registered)"
+
+nick(nick) ::= ":Reserved nickname <nick>"
+
+ERR_NEEDMOREPARAMS(command) ::="<command> :Not enough parameters"
+
+ERR_NOTEXTTOSEND() ::= ":No text to send"
+
+ERR_NORECIPIENT(command) ::=":No recipient given (<command>)"
+
+Send_PRIVMSG(nick, user, host, targetnick, nachricht) ::= ":<nick>!<user>@<host> PRIVMSG <targetnick>: <nachricht>"
+
+ERR_NOSUCHNICK(nick) ::= "<nickname> :No such nick/channel"
