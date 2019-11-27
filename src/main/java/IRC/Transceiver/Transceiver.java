@@ -1,7 +1,10 @@
 package IRC.Transceiver;
 
+import Echo.EchoClientManager;
+import Echo.EchoServerManager;
 import IRC.Actor;
 import IRC.ClientManager;
+import Zitate.ZitatClientManager;
 
 
 import java.io.IOException;
@@ -20,6 +23,17 @@ public class Transceiver implements Actor {
         receiverThread = new Thread(receiver);
     }
 
+    public Transceiver (Socket socket, EchoClientManager echoClientManager, boolean server) throws IOException {
+        transmitter = new Transmitter(socket);
+        receiver = (new Receiver(socket, echoClientManager, server));
+        receiverThread = new Thread(receiver);
+    }
+
+    public Transceiver (Socket socket, ZitatClientManager zitatClientManager, boolean server) throws IOException {
+        transmitter = new Transmitter(socket);
+        receiver = (new Receiver(socket, zitatClientManager, server));
+        receiverThread = new Thread(receiver);
+    }
 
     public void start()  {
         receiverThread.start();

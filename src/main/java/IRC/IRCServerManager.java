@@ -17,7 +17,7 @@ public class IRCServerManager {
     private ServerSocket serverSocket;
     private String host = InetAddress.getLocalHost().toString();
 
-    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
+    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
 
     public IRCServerManager(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);

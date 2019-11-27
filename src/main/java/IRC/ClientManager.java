@@ -16,7 +16,7 @@ public class ClientManager extends Thread implements Actor {
     private Transceiver transceiver;
     private User user;
     private String clientAdress;
-    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
+    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
 
     public ClientManager(Socket socket, IRCServerManager ircServerManager) throws IOException {
         this.socket = socket;
@@ -34,32 +34,33 @@ public class ClientManager extends Thread implements Actor {
         String str = nachricht.substring(nachricht.indexOf(" ")+1);
         return str.split(" ");
     }
-    /**
-     * Diese Methode verarbeitet die Befehle, die der ClientManager schickt.
-     * @throws IOException
-     */
+
+
     public void request(String nachricht) throws IOException {
         String[] parameters = getParameters(nachricht);
 
-                if (nachricht.startsWith("NICK")) {
+        if (nachricht.startsWith("NICK")) {
 
-             String ret = ircServerManager.nick(parameters[0], user);
-                       tell(ret, null);
-                }
+            String ret = ircServerManager.nick(parameters[0], user);
+            tell(ret, null);
+        }
 
-                if (nachricht.startsWith("USER")) {
-                if(parameters.length < 2){
-                    ST st461 = templates.getInstanceOf("ERR_NEEDMOREPARAMS");
-                    tell(st461.add("command", "USER").render(), null);
-                    return;
-                }
-                    tell(ircServerManager.addUser(parameters[0],
-                            parameters[1], clientAdress, this), null);
-                }
+        else if (nachricht.startsWith("USER")) {
+            if(parameters.length < 2){
+                ST st461 = templates.getInstanceOf("ERR_NEEDMOREPARAMS");
+                tell(st461.add("command", "USER").render(), null);
+                return;
+            }
+            tell(ircServerManager.addUser(parameters[0],
+                    parameters[1], clientAdress, this), null);
+        }
 
-        if (user.isRegister() && nachricht.startsWith("PRIVMSG")) {
+        else if (user.isRegister() && nachricht.startsWith("PRIVMSG")) {
             ircServerManager.sendPrivateMessage(parameters[0],
                     parameters[1], user);
+        } else {
+            ST st421 = templates.getInstanceOf("ERR_UNKNOWNCOMMAND");
+            tell(st421.add("command", nachricht).render(), null);
         }
 
     }
