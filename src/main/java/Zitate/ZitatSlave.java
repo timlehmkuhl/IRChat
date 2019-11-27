@@ -1,6 +1,6 @@
 package Zitate;
 
-import IRC.Actor;
+import IRC.Transceiver.Actor;
 import IRC.Transceiver.Transceiver;
 
 import java.io.BufferedReader;
@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ZitatClientManager extends Thread implements Actor{
+public class ZitatSlave extends Thread implements Actor{
     private Socket socket;
     private Transceiver transceiver;
 
 
-    public ZitatClientManager(Socket socket) throws IOException {
+    public ZitatSlave(Socket socket) throws IOException {
         this.socket = socket;
         this.transceiver = new Transceiver(socket, this, true);
     }

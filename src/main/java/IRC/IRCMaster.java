@@ -11,15 +11,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IRCServerManager {
+public class IRCMaster {
 
     private List<User> users = new ArrayList<User>();
     private ServerSocket serverSocket;
-    private String host = InetAddress.getLocalHost().toString();
+    private String host = InetAddress.getLocalHost().getHostAddress();
 
     private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
 
-    public IRCServerManager(int port) throws IOException {
+    public IRCMaster(int port) throws IOException {
+        System.err.println(" IP: " + host);
         this.serverSocket = new ServerSocket(port);
         request();
     }
@@ -28,20 +29,14 @@ public class IRCServerManager {
     public void request() throws IOException {
         while(true) {
             Socket socket = serverSocket.accept();
-            new ClientManager(socket, this).start();
+            new IRCSlave(socket, this).start();
         }
     }
 
-    public String[] getParameters(String nachricht){
-        String str = nachricht.substring(nachricht.indexOf(" ")+1);
-        return str.split(" ");
-    }
 
-    /**
-     * Einen neuen User adden
-     */
-    public String addUser(String nick, String username, String fullname, ClientManager clientManager)  {
-        User newUser = new User(nick, username, fullname, clientManager, true);
+
+    public String addUser(String nick, String username, String fullname, IRCSlave IRCSlave)  {
+        User newUser = new User(nick, username, fullname, IRCSlave, true);
         for (User u : users) {
             if (u.equals(newUser) && u.isRegister()){
                 ST st462 = templates.getInstanceOf("ERR_ALREADYREGISTRED");
@@ -53,18 +48,18 @@ public class IRCServerManager {
                 u.setRegister(true);
                 u.setNick(nick);
                 ST st001 = templates.getInstanceOf("welcome");
-                st001.add("nick", nick).add("user", username).add("host", clientManager.getClientAdress());
+                st001.add("nick", nick).add("user", username).add("host", IRCSlave.getClientAdress());
                 return st001.render();
             }
         }
         users.add(newUser);
-        clientManager.setUser(newUser);
+        IRCSlave.setUser(newUser);
         ST st001 = templates.getInstanceOf("welcome");
-        st001.add("nick", nick).add("user", username).add("host", clientManager.getClientAdress());
+        st001.add("nick", nick).add("user", username).add("host", IRCSlave.getClientAdress());
         return st001.render();
     }
 
-    public String nick(String nick, User sender) throws IOException {
+    public String nick(String nick, User sender) {
         if (nick.length() == 0) {
             ST st431 = templates.getInstanceOf("ERR_NONICKNAMEGIVEN");
             return st431.render();
@@ -122,7 +117,7 @@ public class IRCServerManager {
     }
 
 
- /*   public void notice(String nick, String message, User sender) throws IOException {
+    /*   public void notice(String nick, String message, User sender) throws IOException {
         String head = ":" + sender.getNick() + "!" + sender.getAddress() + " NOTICE";
         for (User u : users) {
             if (u.getNick().equals(nick)) {
@@ -146,7 +141,7 @@ public class IRCServerManager {
 
 
  /*   public void removeUser(User user, String message) throws IOException {
-        user.getClientManagerThread().interrupt();
+        user.getIRCSlaveThread().interrupt();
         users.remove(user);
         serverMessages(message);
     }*/

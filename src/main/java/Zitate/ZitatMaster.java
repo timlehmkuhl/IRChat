@@ -1,17 +1,15 @@
 package Zitate;
 
-import Echo.EchoClientManager;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ZitatServerManager {
+public class ZitatMaster {
 
     private ServerSocket serverSocket;
 
 
-    public ZitatServerManager(int port) throws IOException {
+    public ZitatMaster(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         request();
     }
@@ -20,7 +18,7 @@ public class ZitatServerManager {
     public void request() throws IOException {
         while(true) {
             Socket socket = serverSocket.accept();
-            new ZitatClientManager(socket).start();
+            new ZitatSlave(socket).start();
         }
     }
 }

@@ -1,16 +1,16 @@
 package Echo;
 
-import IRC.Actor;
+import IRC.Transceiver.Actor;
 import IRC.Transceiver.Transceiver;
 import java.io.IOException;
 import java.net.Socket;
 
-public class EchoClientManager extends Thread implements Actor{
+public class EchoSlave extends Thread implements Actor{
     private Socket socket;
     private Transceiver transceiver;
 
 
-    public EchoClientManager(Socket socket) throws IOException {
+    public EchoSlave(Socket socket) throws IOException {
         this.socket = socket;
         this.transceiver = new Transceiver(socket, this, true);
     }

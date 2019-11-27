@@ -1,4 +1,4 @@
-package IRC;
+package IRC.Transceiver;
 
 import java.io.IOException;
 

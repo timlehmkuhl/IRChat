@@ -1,8 +1,8 @@
 package IRC.Transceiver;
 
-import Echo.EchoClientManager;
-import IRC.ClientManager;
-import Zitate.ZitatClientManager;
+import Echo.EchoSlave;
+import IRC.IRCSlave;
+import Zitate.ZitatSlave;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,28 +12,28 @@ public class Receiver implements Runnable {
     private Socket socket;
     private BufferedReader in;
     private boolean server;
-    private ClientManager clientManager;
-    private EchoClientManager echoClientManager;
-    private ZitatClientManager zitatClientManager;
+    private IRCSlave IRCSlave;
+    private EchoSlave echoSlave;
+    private ZitatSlave zitatSlave;
 
-    public Receiver(Socket socket, ClientManager clientManager, boolean server) throws IOException {
+    public Receiver(Socket socket, IRCSlave IRCSlave, boolean server) throws IOException {
         this.server = server;
         this.socket = socket;
-        this.clientManager = clientManager;
+        this.IRCSlave = IRCSlave;
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    public Receiver(Socket socket, EchoClientManager echoClientManager, boolean server) throws IOException {
+    public Receiver(Socket socket, EchoSlave echoSlave, boolean server) throws IOException {
         this.server = server;
         this.socket = socket;
-        this.echoClientManager = echoClientManager;
+        this.echoSlave = echoSlave;
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    public Receiver(Socket socket, ZitatClientManager zitatClientManager, boolean server) throws IOException {
+    public Receiver(Socket socket, ZitatSlave zitatSlave, boolean server) throws IOException {
         this.server = server;
         this.socket = socket;
-        this.zitatClientManager = zitatClientManager;
+        this.zitatSlave = zitatSlave;
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
@@ -41,20 +41,20 @@ public class Receiver implements Runnable {
         String nachricht;
         try {
         while(!(nachricht = in.readLine()).equals("\u0004")) {
-            if(clientManager != null)
-            clientManager.request(nachricht);
-            if(echoClientManager != null)
-            echoClientManager.request(nachricht);
-            if(zitatClientManager != null)
-                zitatClientManager.request(nachricht);
+            if(IRCSlave != null)
+                IRCSlave.request(nachricht);
+            if(echoSlave != null)
+                echoSlave.request(nachricht);
+            if(zitatSlave != null)
+                zitatSlave.request(nachricht);
             System.err.println(nachricht);
             if(!server) {
-                if(clientManager != null)
-                clientManager.tell(nachricht, null);
-                if(echoClientManager != null)
-                echoClientManager.tell(nachricht, null);
-                if(zitatClientManager != null)
-                    zitatClientManager.tell(nachricht, null);
+                if(IRCSlave != null)
+                  IRCSlave.tell(nachricht, null);
+                if(echoSlave != null)
+                    echoSlave.tell(nachricht, null);
+                if(zitatSlave != null)
+                    zitatSlave.tell(nachricht, null);
             }
         }
         socket.shutdownInput();

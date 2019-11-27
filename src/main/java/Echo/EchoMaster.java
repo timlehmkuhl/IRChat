@@ -5,11 +5,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 
-public class EchoServerManager {
+public class EchoMaster {
     private ServerSocket serverSocket;
 
 
-    public EchoServerManager(int port) throws IOException {
+    public EchoMaster(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         request();
     }
@@ -18,7 +18,7 @@ public class EchoServerManager {
     public void request() throws IOException {
         while(true) {
             Socket socket = serverSocket.accept();
-            new EchoClientManager(socket).start();
+            new EchoSlave(socket).start();
         }
     }
 

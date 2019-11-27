@@ -1,10 +1,8 @@
 package IRC.Transceiver;
 
-import Echo.EchoClientManager;
-import Echo.EchoServerManager;
-import IRC.Actor;
-import IRC.ClientManager;
-import Zitate.ZitatClientManager;
+import Echo.EchoSlave;
+import IRC.IRCSlave;
+import Zitate.ZitatSlave;
 
 
 import java.io.IOException;
@@ -17,21 +15,21 @@ public class Transceiver implements Actor {
     private Thread receiverThread;
 
 
-    public Transceiver (Socket socket, ClientManager clientManager, boolean server) throws IOException {
+    public Transceiver (Socket socket, IRCSlave IRCSlave, boolean server) throws IOException {
         transmitter = new Transmitter(socket);
-        receiver = (new Receiver(socket, clientManager, server));
+        receiver = (new Receiver(socket, IRCSlave, server));
         receiverThread = new Thread(receiver);
     }
 
-    public Transceiver (Socket socket, EchoClientManager echoClientManager, boolean server) throws IOException {
+    public Transceiver (Socket socket, EchoSlave echoSlave, boolean server) throws IOException {
         transmitter = new Transmitter(socket);
-        receiver = (new Receiver(socket, echoClientManager, server));
+        receiver = (new Receiver(socket, echoSlave, server));
         receiverThread = new Thread(receiver);
     }
 
-    public Transceiver (Socket socket, ZitatClientManager zitatClientManager, boolean server) throws IOException {
+    public Transceiver (Socket socket, ZitatSlave zitatSlave, boolean server) throws IOException {
         transmitter = new Transmitter(socket);
-        receiver = (new Receiver(socket, zitatClientManager, server));
+        receiver = (new Receiver(socket, zitatSlave, server));
         receiverThread = new Thread(receiver);
     }
 
@@ -45,7 +43,7 @@ public class Transceiver implements Actor {
     }
 
     @Override
-    public void shutdown() throws IOException {
+    public void shutdown()  {
         transmitter.tell("\u0004", null);
 
     }

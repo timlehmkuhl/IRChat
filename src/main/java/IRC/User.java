@@ -7,14 +7,14 @@ public class User {
     private String name;
     private String address;
     private boolean register;
-    private ClientManager clientManagerThread;
+    private IRCSlave IRCSlaveThread;
 
 
-    public User(String nick, String name, String address, ClientManager clientManagerThread, boolean register) {
+    public User(String nick, String name, String address, IRCSlave IRCSlaveThread, boolean register) {
         this.nick = nick;
         this.name = name;
         this.address = address;
-        this.clientManagerThread = clientManagerThread;
+        this.IRCSlaveThread = IRCSlaveThread;
         this.register = register;
     }
 
@@ -55,13 +55,13 @@ public class User {
 
 
 
-    public ClientManager getClientManagerThread() {
-        return clientManagerThread;
+    public IRCSlave getIRCSlaveThread() {
+        return IRCSlaveThread;
     }
 
 
 
     public void sendMessage(String message) throws IOException {
-        clientManagerThread.tell(message, null);
+        IRCSlaveThread.tell(message, null);
     }
 }
