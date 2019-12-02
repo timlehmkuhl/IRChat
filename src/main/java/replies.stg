@@ -25,3 +25,5 @@ ERR_NOSUCHNICK(nick) ::= "<nickname> :No such nick/channel"
 ERR_UNKNOWNCOMMAND(command) ::=":ERROR : <command> :Unknown command"
 
 Pong(host) ::="PONG"
+
+Quit(nick, user, host, nachricht, clienthost) ::=":<nick>!<user>@<host> Closing Link: <clienthost> (<nachricht>)"

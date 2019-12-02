@@ -168,10 +168,12 @@ public class IRCMaster {
 
 
    public void removeUser(User user, String message) throws IOException {
+       ST q = templates.getInstanceOf("Quit");
+       q.add("nick", user.getNick()).add("user", user.getName()).add("host", host).add("nachricht", message).add("clienthost", user.getAddress());
         user.getIRCSlave().interrupt();
         users.remove(user);
        for (User u : users) {
-           u.sendMessage(host + ":" + message);
+           u.sendMessage(q.render());
        }
     }
 
