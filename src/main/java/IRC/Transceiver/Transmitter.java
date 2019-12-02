@@ -21,7 +21,7 @@ public class Transmitter implements Actor {
 
         @Override
         public void shutdown() throws IOException {
-            writer.println("/u0004");
+            writer.println("\u0004");
             socket.shutdownOutput();
         }
 

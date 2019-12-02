@@ -83,7 +83,7 @@ public class IRCSlave extends Thread implements Actor {
                     parameters[1], clientAdress, this), null);
         }
 
-        else if (user.isRegister() && nachricht.startsWith("PRIVMSG")) {
+        else if (user.isRegistered() && nachricht.startsWith("PRIVMSG")) {
             if(parameters.length < 2){
                 ST st461 = templates.getInstanceOf("ERR_NEEDMOREPARAMS");
                 tell(st461.add("command", "PRIVMSG").render(), null);
@@ -91,12 +91,16 @@ public class IRCSlave extends Thread implements Actor {
             }
             ircMaster.sendPrivateMessage(parameters[0], getAllInOneParameters(nachricht, 1), user, false);
         }  else
-        if (user.isRegister() && nachricht.startsWith("NOTICE")) {
+        if (user.isRegistered() && nachricht.startsWith("NOTICE")) {
             ircMaster.sendPrivateMessage(parameters[0], getAllInOneParameters(nachricht, 1), user, true);
+        }
+        else if (user.isRegistered() && nachricht.startsWith("QUIT")) {
+            ircMaster.removeUser(user, parameters[0]);
+            shutdown();
         } else
-            if(user.isRegister() && nachricht.startsWith("PING")){
+            if(user.isRegistered() && nachricht.startsWith("PING")){
             tell(ircMaster.pong(), null);
-        } else if(user.isRegister() && nachricht.startsWith("PONG")){
+        } else if(user.isRegistered() && nachricht.startsWith("PONG")){
 
             }
         else {
@@ -106,6 +110,7 @@ public class IRCSlave extends Thread implements Actor {
         }
 
     }
+
 
     @Override
     public void tell(String message, Actor sender) throws IOException {

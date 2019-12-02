@@ -16,6 +16,7 @@ public class Transmitter<A> implements Actor<A> {
 
 	@Override
 	public void shutdown() {
+		TCPSocket.send("\u0004");
 	}
 
 	

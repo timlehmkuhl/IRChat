@@ -49,7 +49,7 @@ public class IRCMaster {
     public String addUser(String nick, String username, String fullname, IRCSlave IRCSlave)  {
         User newUser = new User(nick, username, fullname, IRCSlave, true);
         for (User u : users) {
-            if (u.equals(newUser) && u.isRegister()){
+            if (u.equals(newUser) && u.isRegistered()){
                 ST st462 = templates.getInstanceOf("ERR_ALREADYREGISTRED");
                 return st462.render();
             }
@@ -86,7 +86,7 @@ public class IRCMaster {
             return st433.add("nick", nick).render();
         }
         for (User u : users) {
-            if (u.equals(sender) && u.isRegister()) {
+            if (u.equals(sender) && u.isRegistered()) {
                 sender.setNick(nick);
                 ST stChangeNick = templates.getInstanceOf("changenick");
                 return stChangeNick.add("nick", nick).render();
@@ -167,9 +167,12 @@ public class IRCMaster {
 
 
 
- /*   public void removeUser(User user, String message) throws IOException {
-        user.getIRCSlaveThread().interrupt();
+   public void removeUser(User user, String message) throws IOException {
+        user.getIRCSlave().interrupt();
         users.remove(user);
-        serverMessages(message);
-    }*/
+       for (User u : users) {
+           u.sendMessage(host + ":" + message);
+       }
+    }
+
 }

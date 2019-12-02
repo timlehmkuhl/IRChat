@@ -7,14 +7,14 @@ public class User {
     private String name;
     private String address;
     private boolean register;
-    private IRCSlave IRCSlaveThread;
+    private IRCSlave IRCSlave;
 
 
-    public User(String nick, String name, String address, IRCSlave IRCSlaveThread, boolean register) {
+    public User(String nick, String name, String address, IRCSlave IRCSlave, boolean register) {
         this.nick = nick;
         this.name = name;
         this.address = address;
-        this.IRCSlaveThread = IRCSlaveThread;
+        this.IRCSlave = IRCSlave;
         this.register = register;
     }
 
@@ -39,7 +39,7 @@ public class User {
     }
 
 
-    public boolean isRegister() {
+    public boolean isRegistered() {
         return register;
     }
 
@@ -49,12 +49,16 @@ public class User {
 
 
     public void sendMessage(String message) throws IOException {
-        IRCSlaveThread.tell(message, null);
+        IRCSlave.tell(message, null);
     }
 
     @Override
     public boolean equals(Object obj) {
         User temp = (User) obj;
         return temp.getAddress().equals(this.address);
+    }
+
+    public Thread getIRCSlave() {
+        return this.IRCSlave;
     }
 }
