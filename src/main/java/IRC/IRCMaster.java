@@ -15,9 +15,9 @@ public class IRCMaster {
 
     private List<User> users = new ArrayList<User>();
     private ServerSocket serverSocket;
-    private String host = InetAddress.getLocalHost().getHostAddress();
+    String host = InetAddress.getLocalHost().getHostAddress();
 
-    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
+    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
 
     public IRCMaster(int port) throws IOException {
         System.err.println(" IP: " + host);
@@ -25,7 +25,10 @@ public class IRCMaster {
         request();
     }
 
-
+    /**
+     * Wartet auf Clienten und erstellt Slaves
+     * @throws IOException
+     */
     public void request() throws IOException {
         while(true) {
             Socket socket = serverSocket.accept();
@@ -34,7 +37,15 @@ public class IRCMaster {
     }
 
 
-
+    /**
+     * Fuegt einen neuen, noch nicht bestehenden User hinzu.
+     * Wird von den Salves aufgerufen
+     * @param nick
+     * @param username
+     * @param fullname
+     * @param IRCSlave
+     * @return
+     */
     public String addUser(String nick, String username, String fullname, IRCSlave IRCSlave)  {
         User newUser = new User(nick, username, fullname, IRCSlave, true);
         for (User u : users) {
@@ -59,6 +70,12 @@ public class IRCMaster {
         return st001.render();
     }
 
+    /**
+     * Prueft auf neue, gueltige Nicknamen und reserviert sie
+     * @param nick
+     * @param sender
+     * @return
+     */
     public String nick(String nick, User sender) {
         if (nick.length() == 0) {
             ST st431 = templates.getInstanceOf("ERR_NONICKNAMEGIVEN");
@@ -82,7 +99,18 @@ public class IRCMaster {
       return stNick.add("nick", nick).render() ;
     }
 
-    public boolean sendPrivateMessage(String tragetNick, String message, User sender) throws IOException {
+
+    /**
+     * Uebergibt einen bestehenden User eine Nachricht eines anderen Users
+     * @param tragetNick
+     * @param message
+     * @param sender
+     * @param notice
+     * @return
+     * @throws IOException
+     */
+    public boolean sendPrivateMessage(String tragetNick, String message, User sender, boolean notice) throws IOException {
+        System.err.println(message);
         if (message.length() == 0) {
             ST st412 = templates.getInstanceOf("ERR_NOTEXTTOSEND");
             sender.sendMessage(st412.render());
@@ -94,11 +122,17 @@ public class IRCMaster {
             return false;
         }
 
-        ST ret = templates.getInstanceOf("Send_PRIVMSG");
         for (User u : users) {
             if (u.getNick().equals(tragetNick)) {
-                ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", tragetNick).add("nachricht", message);
-                u.sendMessage(ret.render());
+                if(!notice) {
+                    ST ret = templates.getInstanceOf("Send_PRIVMSG");
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", tragetNick).add("nachricht", message);
+                    u.sendMessage(ret.render());
+                } else if(notice){
+                    ST ret = templates.getInstanceOf("Send_NOTICE");
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("nachricht", message);
+                    u.sendMessage(ret.render());
+                }
                 return true;
             }
         }
@@ -108,6 +142,11 @@ public class IRCMaster {
     }
 
 
+    /**
+     * Prueft ob bereits ein Nickname existiert
+     * @param nick
+     * @return
+     */
     public boolean existNick(String nick) {
         for (User u : users) {
             if (u.getNick().equals(nick))
@@ -117,26 +156,14 @@ public class IRCMaster {
     }
 
 
-    /*   public void notice(String nick, String message, User sender) throws IOException {
-        String head = ":" + sender.getNick() + "!" + sender.getAddress() + " NOTICE";
-        for (User u : users) {
-            if (u.getNick().equals(nick)) {
-                u.sendMessage(head + " :" + message);
-            }
-        }
-    }*/
-
-
-
-  /*  public void serverMessages(String message) throws IOException {
-        for (User u : users) {
-            u.sendMessage(host + ":" + message);
-        }
-    }*/
-
- /*   public String pong() {
-        return host + " PONG";
-    }*/
+    /**
+     * Schickt ein Pong
+     * @return
+     */
+    public String pong() {
+        ST p = templates.getInstanceOf("Pong");
+        return p.add("host", host).render();
+    }
 
 
 

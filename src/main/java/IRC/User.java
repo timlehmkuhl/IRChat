@@ -39,12 +39,6 @@ public class User {
     }
 
 
-    @Override
-    public boolean equals(Object obj) {
-        User temp = (User) obj;
-        return temp.getAddress().equals(this.address);
-    }
-
     public boolean isRegister() {
         return register;
     }
@@ -54,14 +48,13 @@ public class User {
     }
 
 
-
-    public IRCSlave getIRCSlaveThread() {
-        return IRCSlaveThread;
-    }
-
-
-
     public void sendMessage(String message) throws IOException {
         IRCSlaveThread.tell(message, null);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        User temp = (User) obj;
+        return temp.getAddress().equals(this.address);
     }
 }

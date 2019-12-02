@@ -16,8 +16,12 @@ ERR_NOTEXTTOSEND() ::= ":No text to send"
 
 ERR_NORECIPIENT(command) ::=":No recipient given (<command>)"
 
-Send_PRIVMSG(nick, user, host, targetnick, nachricht) ::= ":<nick>!<user>@<host> PRIVMSG <targetnick>: <nachricht>"
+Send_PRIVMSG(nick, user, host, targetnick, nachricht) ::= ":<nick>!<user>@<host> PRIVMSG <targetnick> :<nachricht>"
+
+Send_NOTICE(nick, user, host, nachricht) ::= ":<nick>!<user>@<host> NOTICE :<nachricht>"
 
 ERR_NOSUCHNICK(nick) ::= "<nickname> :No such nick/channel"
 
-ERR_UNKNOWNCOMMAND(command) ::="<command> :Unknown command"
+ERR_UNKNOWNCOMMAND(command) ::=":ERROR : <command> :Unknown command"
+
+Pong(host) ::="PONG"

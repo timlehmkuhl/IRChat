@@ -17,7 +17,7 @@ public class IRCSlave extends Thread implements Actor {
     private Transceiver transceiver;
     private User user;
     private String clientAdress;
-    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
+    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
 
     public IRCSlave(Socket socket, IRCMaster ircMaster) throws IOException {
         this.socket = socket;
@@ -27,15 +27,29 @@ public class IRCSlave extends Thread implements Actor {
         user = new User(null, null, clientAdress, this, false);
     }
 
+    /**
+     * Startet einen transceiver Slave Thread
+     */
     public void run() {
         transceiver.start();
     }
 
+    /**
+     * Gibt die Parameter eines Befehls zurueck
+     * @param nachricht
+     * @return
+     */
     public String[] getParameters(String nachricht){
         String str = nachricht.substring(nachricht.indexOf(" ")+1);
         return str.split(" ");
     }
 
+    /**
+     * Gibt alle Parameter eines Befehls ab dem offset in einem String zurueck
+     * @param nachricht
+     * @param offset
+     * @return
+     */
     public String getAllInOneParameters(String nachricht, int offset){
         String str = nachricht.substring(nachricht.indexOf(" ")+1);
         String split[] = str.split(" ");
@@ -45,7 +59,11 @@ public class IRCSlave extends Thread implements Actor {
         return ret.trim();
     }
 
-
+    /**
+     * Verarbeitet Befehle und fuert daraufhin gewuenschte Aktionen aus.
+     * @param nachricht
+     * @throws IOException
+     */
     public void request(String nachricht) throws IOException {
         String[] parameters = getParameters(nachricht);
 
@@ -71,10 +89,20 @@ public class IRCSlave extends Thread implements Actor {
                 tell(st461.add("command", "PRIVMSG").render(), null);
                 return;
             }
-            ircMaster.sendPrivateMessage(parameters[0], getAllInOneParameters(nachricht, 1), user);
-        } else {
+            ircMaster.sendPrivateMessage(parameters[0], getAllInOneParameters(nachricht, 1), user, false);
+        }  else
+        if (user.isRegister() && nachricht.startsWith("NOTICE")) {
+            ircMaster.sendPrivateMessage(parameters[0], getAllInOneParameters(nachricht, 1), user, true);
+        } else
+            if(user.isRegister() && nachricht.startsWith("PING")){
+            tell(ircMaster.pong(), null);
+        } else if(user.isRegister() && nachricht.startsWith("PONG")){
+
+            }
+        else {
+            String s[] = nachricht.split(" ");
             ST st421 = templates.getInstanceOf("ERR_UNKNOWNCOMMAND");
-            tell(st421.add("command", nachricht).render(), null);
+            tell(st421.add("command", s[0]).render(), null);
         }
 
     }
