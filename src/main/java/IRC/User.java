@@ -18,6 +18,11 @@ public class User {
         this.register = register;
     }
 
+    public void sendMessage(String message) throws IOException {
+        IRCSlave.tell(message, null);
+    }
+
+
     public String getNick() {
         return nick;
     }
@@ -48,9 +53,7 @@ public class User {
     }
 
 
-    public void sendMessage(String message) throws IOException {
-        IRCSlave.tell(message, null);
-    }
+
 
     @Override
     public boolean equals(Object obj) {
