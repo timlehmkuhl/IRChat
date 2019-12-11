@@ -32,7 +32,7 @@ public class ZitatSlave extends Thread implements Actor{
         BufferedReader reader;
 
         reader = new BufferedReader(new FileReader(
-                "G:\\InfTest\\IRC2\\src\\main\\java\\IRC\\Transceiver\\zitate.txt"));
+                "/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/IRC/Transceiver/zitate.txt"));
         String line = reader.readLine();
         while (line != null) {
 

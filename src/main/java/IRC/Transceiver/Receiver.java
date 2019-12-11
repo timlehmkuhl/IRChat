@@ -59,7 +59,7 @@ public class Receiver implements Runnable {
         }
         socket.shutdownInput();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.print("Client beendet");
         }
     }
 

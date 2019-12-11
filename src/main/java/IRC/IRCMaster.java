@@ -1,5 +1,11 @@
 package IRC;
 
+import IRC.Antlr.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -17,7 +23,7 @@ public class IRCMaster {
     private ServerSocket serverSocket;
     String host = InetAddress.getLocalHost().getHostAddress();
 
-    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
+    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
 
     public IRCMaster(int port) throws IOException {
         System.err.println(" IP: " + host);
@@ -176,5 +182,7 @@ public class IRCMaster {
            u.sendMessage(q.render());
        }
     }
+
+
 
 }
