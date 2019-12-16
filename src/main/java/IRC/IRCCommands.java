@@ -63,8 +63,9 @@ public class IRCCommands extends IRCBaseListener {
             return;
         }
         try {
+            String name = ctx.sentence().getText().replace(" ", "");
             ircSlave.tell(ircMaster.addUser(ctx.para1().getText(),
-                    ctx.sentence().getText(), ircSlave.getClientAdress(), ircSlave), null);
+                    ctx.para1().getText(), ircSlave.getClientAdress(), ircSlave), null);
         } catch (IOException e) {
             e.printStackTrace();
         }

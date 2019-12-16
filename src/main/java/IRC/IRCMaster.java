@@ -161,11 +161,11 @@ public class IRCMaster {
             for (User u : channelUserMap.get(target)) {
                 if(!notice) {
                     ST ret = templates.getInstanceOf("Send_PRIVMSG");
-                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", target).add("nachricht", message);
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress().replace(":", "")).add("targetnick", target).add("nachricht", message);
                     u.sendMessage(ret.render());
                 } else if(notice){
                     ST ret = templates.getInstanceOf("Send_NOTICE");
-                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("nachricht", message);
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress().replace(":", "")).add("nachricht", message);
                     u.sendMessage(ret.render());
                 }
             }
@@ -173,7 +173,7 @@ public class IRCMaster {
         }
         if (!channelUserMap.containsKey(target)) {
             ST st404 = templates.getInstanceOf("ERR_CANNOTSENDTOCHAN");
-            sender.sendMessage(st404.add("name", target).render());
+            sender.sendMessage(st404.add("name", target).add("host", host).add("nick", sender.getNick()).render());
             return false;
         }
 
@@ -211,9 +211,35 @@ public class IRCMaster {
 
         channelUserList.add(sender);
         channelUserMap.put(channelName, channelUserList);
+
+        Channel channel = null;
+        for(Channel c : channels){
+            if(c.getName().equals(channelName))
+                channel = c;
+            break;
+        }
+
+        String users = "";
+
+
+            for(Map.Entry<String,List<User>> entry : channelUserMap.entrySet()){
+                if(entry.getKey().equals(channelName)) {
+                    for (User u : entry.getValue()) {
+                        users += u.getNick() + " ";
+
+                    }
+                }
+            }
+        ST topicST = templates.getInstanceOf("RPL_TOPIC");
+        String topic = "";
+        if(channel.getTopic() != null)
+        topic = topicST.add("name", channelName).add("topic", channel.getTopic()).add("host", host).add("nick", sender.getNick()).render() + "\n";
+        ST j = templates.getInstanceOf("join");
         ST st353 = templates.getInstanceOf("RPL_NAMEREPLY");
         ST st366 = templates.getInstanceOf("RPL_ENDOFNAMES");
-        return st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
+        return j.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
+                + topic
+                + st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).add("users", users.trim()).render()
                 + st366.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render();
 
     }
@@ -221,7 +247,7 @@ public class IRCMaster {
     public boolean leaveChannel(User user, String channel) throws IOException {
         if(!(channelUserMap.get(channel).contains(user))) {
             ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
-            user.sendMessage(st442.add("name", channel).render());
+            user.sendMessage(st442.add("name", channel).add("host", host).add("nick", user.getNick()).render());
             return false;
         }
         if(!(channelUserMap.containsKey(channel))) {
@@ -253,7 +279,7 @@ public class IRCMaster {
             }
         }
         ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
-        sender.sendMessage(st442.add("name", channelName).render());
+        sender.sendMessage(st442.add("name", channelName).add("host", host).add("nick", sender.getNick()).render());
         return false;
     }
 
@@ -285,8 +311,15 @@ public class IRCMaster {
 
 
    public void removeUser(User user, String message) throws IOException {
+        if(message == null || message.equals("")) message = " ";
        ST q = templates.getInstanceOf("Quit");
        q.add("nick", user.getNick()).add("user", user.getName()).add("host", host).add("nachricht", message).add("clienthost", user.getAddress());
+       for(Map.Entry<String,List<User>> entry : channelUserMap.entrySet()){
+            for(User u: entry.getValue()){
+                if(u.equals(user))  channelUserMap.get(entry.getKey()).remove(user);
+                break;
+            }
+       }
         user.getIRCSlave().interrupt();
         users.remove(user);
        for (User u : users) {

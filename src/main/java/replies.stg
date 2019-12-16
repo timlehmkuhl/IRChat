@@ -26,18 +26,20 @@ ERR_UNKNOWNCOMMAND(command) ::=":ERROR : <command> :Unknown command"
 
 Pong(host) ::="PONG"
 
-Quit(nick, user, host, nachricht, clienthost) ::=":<nick>!<user>@<host> Closing Link: <clienthost> (<nachricht>)"
+Quit(nick, user, host, nachricht, clienthost) ::=":<nick>!<user>@<host>Closing Link: <host> (<nachricht>)"
 
 ERR_NOSUCHCHANNEL(name) ::="<name> :No such channel"
 
-RPL_NAMEREPLY(host,user, nick, name) ::=":<nick>!<user>@<host> = <name> :@foobar1<\n>"
+RPL_NAMEREPLY(host,user, nick, name, users) ::=":<host> 353 * <nick> = <name> :@<users><\n>"
 
-RPL_ENDOFNAMES(host, nick, user, name) ::=":<nick>!<user>@<host> <name> :End of NAMES list"
+RPL_ENDOFNAMES(host, nick, user, name) ::=":<host> 366 * <nick> <name> :End of NAMES list"
 
-ERR_CANNOTSENDTOCHAN(name) ::="<name> :Cannot send to channel"
+join(host,user, nick, name) ::=":<nick>!<user>@<host> JOIN <name><\n>"
 
-ERR_NOTONCHANNEL(name) ::="<name> :You're not on that channel"
+ERR_CANNOTSENDTOCHAN(name, nick, host) ::=":<host> 404 * <nick> <name> :Cannot send to channel"
 
-RPL_TOPIC(name, topic) ::="<name> :<topic>"
+ERR_NOTONCHANNEL(host, nick, name) ::=":<host> 442 * <nick> <name> :You're not on that channel"
+
+RPL_TOPIC(name, topic, host, nick) ::=":<host> 332 * <nick> <name> :<topic>"
 
 leave_channel(name) ::=" :Left <name>"
