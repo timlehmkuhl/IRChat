@@ -27,3 +27,17 @@ ERR_UNKNOWNCOMMAND(command) ::=":ERROR : <command> :Unknown command"
 Pong(host) ::="PONG"
 
 Quit(nick, user, host, nachricht, clienthost) ::=":<nick>!<user>@<host> Closing Link: <clienthost> (<nachricht>)"
+
+ERR_NOSUCHCHANNEL(name) ::="<name> :No such channel"
+
+RPL_NAMEREPLY(host,user, nick, name) ::=":<nick>!<user>@<host> = <name> :@foobar1<\n>"
+
+RPL_ENDOFNAMES(host, nick, user, name) ::=":<nick>!<user>@<host> <name> :End of NAMES list"
+
+ERR_CANNOTSENDTOCHAN(name) ::="<name> :Cannot send to channel"
+
+ERR_NOTONCHANNEL(name) ::="<name> :You're not on that channel"
+
+RPL_TOPIC(name, topic) ::="<name> :<topic>"
+
+leave_channel(name) ::=" :Left <name>"

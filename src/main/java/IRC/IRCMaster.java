@@ -1,11 +1,5 @@
 package IRC;
 
-import IRC.Antlr.*;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -15,7 +9,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class IRCMaster {
 
@@ -23,11 +19,16 @@ public class IRCMaster {
     private ServerSocket serverSocket;
     String host = InetAddress.getLocalHost().getHostAddress();
 
-    private STGroup templates = new STGroupFile("/Users/timmichaellehmkuhl/InfProjekte/irc2/src/main/java/replies.stg");
+    private List<Channel> channels = new ArrayList<Channel>();
+    private List<User> channelUserList = new ArrayList<>();
+    private Map<String, List<User>> channelUserMap = new HashMap<>();
+
+    private STGroup templates = new STGroupFile("G:\\InfTest\\IRC2\\src\\main\\java\\replies.stg");
 
     public IRCMaster(int port) throws IOException {
         System.err.println(" IP: " + host);
         this.serverSocket = new ServerSocket(port);
+     //   createChannel();
         request();
     }
 
@@ -40,6 +41,18 @@ public class IRCMaster {
             Socket socket = serverSocket.accept();
             new IRCSlave(socket, this).start();
         }
+    }
+
+    private void createChannel(){
+        Channel test = new Channel("#Test", "test Channel");
+        Channel gaming = new Channel("#Gaming", "Gaming Channel");
+
+        channels.add(test);
+        channels.add(gaming);
+        channelUserMap.put(test.getName(), users);
+        channelUserMap.put(gaming.getName(), users);
+     //   channelUser.put(gaming.getName(), users);
+
     }
 
 
@@ -108,31 +121,31 @@ public class IRCMaster {
 
     /**
      * Uebergibt einen bestehenden User eine Nachricht eines anderen Users
-     * @param tragetNick
+     * @param target
      * @param message
      * @param sender
      * @param notice
      * @return
      * @throws IOException
      */
-    public boolean sendPrivateMessage(String tragetNick, String message, User sender, boolean notice) throws IOException {
+    public boolean sendPrivateMessage(String target, String message, User sender, boolean notice) throws IOException {
         System.err.println(message);
         if (message.length() == 0) {
             ST st412 = templates.getInstanceOf("ERR_NOTEXTTOSEND");
             sender.sendMessage(st412.render());
             return false;
         }
-        if (tragetNick.length() == 0) {
+        if (target.length() == 0) {
             ST st411 = templates.getInstanceOf("ERR_NORECIPIENT");
-            sender.sendMessage(st411.add("command", tragetNick).render());
+            sender.sendMessage(st411.add("command", target).render());
             return false;
         }
 
         for (User u : users) {
-            if (u.getNick().equals(tragetNick)) {
+            if (u.getNick().equals(target)) {
                 if(!notice) {
                     ST ret = templates.getInstanceOf("Send_PRIVMSG");
-                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", tragetNick).add("nachricht", message);
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", target).add("nachricht", message);
                     u.sendMessage(ret.render());
                 } else if(notice){
                     ST ret = templates.getInstanceOf("Send_NOTICE");
@@ -142,10 +155,108 @@ public class IRCMaster {
                 return true;
             }
         }
+
+        //channel
+        if(channelUserMap.containsKey(target)) {
+            for (User u : channelUserMap.get(target)) {
+                if(!notice) {
+                    ST ret = templates.getInstanceOf("Send_PRIVMSG");
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("targetnick", target).add("nachricht", message);
+                    u.sendMessage(ret.render());
+                } else if(notice){
+                    ST ret = templates.getInstanceOf("Send_NOTICE");
+                    ret.add("nick", sender.getNick()).add("user", sender.getName()).add("host", sender.getAddress()).add("nachricht", message);
+                    u.sendMessage(ret.render());
+                }
+            }
+            return true;
+        }
+        if (!channelUserMap.containsKey(target)) {
+            ST st404 = templates.getInstanceOf("ERR_CANNOTSENDTOCHAN");
+            sender.sendMessage(st404.add("name", target).render());
+            return false;
+        }
+
         ST st401 = templates.getInstanceOf("ERR_NOSUCHNICK");
-        sender.sendMessage(st401.add("nick", tragetNick).render());
+        sender.sendMessage(st401.add("nick", target).render());
         return false;
     }
+
+    public String join(String channelName, User sender)  {
+        boolean flag = false;
+        for (Channel c : channels) {
+            if((c.getName().equals(channelName))) {
+                //System.out.println(c.getName() + " == " + channelName);
+               flag = true;
+            }
+        }
+
+        if(!flag){
+           // ST st403 = templates.getInstanceOf("ERR_NOSUCHCHANNEL");
+          //  return st403.add("name", channelName).render();
+
+            Channel gaming = new Channel(channelName, null);
+            channels.add(gaming);
+            channelUserMap.put(gaming.getName(), users);
+        }
+
+
+     /*  if(channelUser.get(channelName).contains(sender)){
+           try {
+               leaveChannel(sender, sender.getName());
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+       }*/
+
+        channelUserList.add(sender);
+        channelUserMap.put(channelName, channelUserList);
+        ST st353 = templates.getInstanceOf("RPL_NAMEREPLY");
+        ST st366 = templates.getInstanceOf("RPL_ENDOFNAMES");
+        return st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
+                + st366.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render();
+
+    }
+
+    public boolean leaveChannel(User user, String channel) throws IOException {
+        if(!(channelUserMap.get(channel).contains(user))) {
+            ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
+            user.sendMessage(st442.add("name", channel).render());
+            return false;
+        }
+        if(!(channelUserMap.containsKey(channel))) {
+            ST st403 = templates.getInstanceOf("ERR_NOSUCHCHANNEL");
+            user.sendMessage(st403.add("name", channel).render());
+            return false;
+        }
+
+        ST leave = templates.getInstanceOf("leave_channel");
+        user.sendMessage(leave.add("name", channel).render());
+        channelUserMap.get(channel).remove(user);
+        if(channelUserMap.get(channel).isEmpty()) channelUserMap.remove(channel);
+        return true;
+    }
+
+
+    boolean setTopic(String channelName, String messsage, User sender) throws IOException {
+        for (Channel c : channels) {
+            if (c.getName().equals(channelName)) {
+                //if (messsage.equals(":")) {
+                //    c.setTopic(null);
+                //    return true;
+              //  } else {
+                    c.setTopic(messsage);
+                    ST st332 = templates.getInstanceOf("RPL_TOPIC");
+                    sender.sendMessage(st332.add("name", channelName).add("topic", messsage).render());
+                    return true;
+              //  }
+            }
+        }
+        ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
+        sender.sendMessage(st442.add("name", channelName).render());
+        return false;
+    }
+
 
 
     /**
