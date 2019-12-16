@@ -40,13 +40,21 @@ public class IRCSlave extends Thread implements Actor {
 
 
     /**
-     * Verarbeitet Befehle und fuert daraufhin gewuenschte Aktionen aus.
-     * @param nachricht
-     * @throws IOException
+     * Staret einen ANTLR generierten Parser
+     * (Joker Aufgabe Uebs)
+     * @param in
      */
-    public void request(String nachricht) throws IOException {
+    public void request(String in) {
 
-        runAntlr(nachricht);
+        CharStream input = CharStreams.fromString(in);
+        IRCLexer lexer = new IRCLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        IRCParser parser = new IRCParser(tokens);
+        parser.setBuildParseTree(true);
+        ParseTree tree = parser.irc();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        IRCCommands converter = new IRCCommands(ircMaster, this);
+        walker.walk(converter, tree);
 
     }
 
@@ -70,17 +78,6 @@ public class IRCSlave extends Thread implements Actor {
         this.user = user;
     }
 
-    public void runAntlr(String in){
-        CharStream input = CharStreams.fromString(in);
-        IRCLexer lexer = new IRCLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        IRCParser parser = new IRCParser(tokens);
-        parser.setBuildParseTree(true);
-        ParseTree tree = parser.irc();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        IRCCommands converter = new IRCCommands(ircMaster, this);
-        walker.walk(converter, tree);
-    }
 
     public User getUser() {
         return user;

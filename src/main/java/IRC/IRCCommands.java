@@ -175,7 +175,6 @@ public class IRCCommands extends IRCBaseListener {
     @Override
     public void exitUnknown(IRCParser.UnknownContext ctx) {
         ST un = templates.getInstanceOf("ERR_UNKNOWNCOMMAND");
-
         try {
             ircSlave.tell(un.add("command", ctx.para1().getText()).render(), null);
         } catch (IOException e) {

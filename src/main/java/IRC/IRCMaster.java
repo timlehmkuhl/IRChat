@@ -182,11 +182,17 @@ public class IRCMaster {
         return false;
     }
 
+    /**
+     * Fuegt einen User zu einem bestehenden Channel hinzu oder
+     * erstellt einen nicht vorhandenen
+     * @param channelName
+     * @param sender
+     * @return
+     */
     public String join(String channelName, User sender)  {
         boolean flag = false;
         for (Channel c : channels) {
             if((c.getName().equals(channelName))) {
-                //System.out.println(c.getName() + " == " + channelName);
                flag = true;
             }
         }
@@ -199,16 +205,6 @@ public class IRCMaster {
             channels.add(gaming);
             channelUserMap.put(gaming.getName(), users);
         }
-
-
-     /*  if(channelUser.get(channelName).contains(sender)){
-           try {
-               leaveChannel(sender, sender.getName());
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-       }*/
-
         channelUserList.add(sender);
         channelUserMap.put(channelName, channelUserList);
 
@@ -218,10 +214,8 @@ public class IRCMaster {
                 channel = c;
             break;
         }
-
+        // User List
         String users = "";
-
-
             for(Map.Entry<String,List<User>> entry : channelUserMap.entrySet()){
                 if(entry.getKey().equals(channelName)) {
                     for (User u : entry.getValue()) {
@@ -244,6 +238,13 @@ public class IRCMaster {
 
     }
 
+    /**
+     * Entfernt einen User aus einem Channel
+     * @param user
+     * @param channel
+     * @return
+     * @throws IOException
+     */
     public boolean leaveChannel(User user, String channel) throws IOException {
         if(!(channelUserMap.get(channel).contains(user))) {
             ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
@@ -263,19 +264,21 @@ public class IRCMaster {
         return true;
     }
 
-
+    /**
+     * Setzt die Topic eines Channels
+     * @param channelName
+     * @param messsage
+     * @param sender
+     * @return
+     * @throws IOException
+     */
     boolean setTopic(String channelName, String messsage, User sender) throws IOException {
         for (Channel c : channels) {
             if (c.getName().equals(channelName)) {
-                //if (messsage.equals(":")) {
-                //    c.setTopic(null);
-                //    return true;
-              //  } else {
                     c.setTopic(messsage);
                     ST st332 = templates.getInstanceOf("RPL_TOPIC");
                     sender.sendMessage(st332.add("name", channelName).add("topic", messsage).render());
                     return true;
-              //  }
             }
         }
         ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");

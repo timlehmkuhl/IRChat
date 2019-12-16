@@ -1,7 +1,5 @@
 package IRC;
 
-import java.util.List;
-
 public class Channel {
     private String name;
     private String topic;
@@ -15,11 +13,6 @@ public class Channel {
     public String getName() {
         return name;
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 
     public String getTopic() {
         return topic;
