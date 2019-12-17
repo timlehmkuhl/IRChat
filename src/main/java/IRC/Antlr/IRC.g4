@@ -19,7 +19,7 @@ ping: 'PING';
 
 pong: 'PONG';
 
-quit: 'QUIT' WS sentence;
+quit: 'QUIT' WS ':' sentence;
 
 join: 'JOIN' WS channelname;
 

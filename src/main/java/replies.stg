@@ -41,5 +41,8 @@ ERR_CANNOTSENDTOCHAN(name, nick, host) ::=":<host> 404 * <nick> <name> :Cannot s
 ERR_NOTONCHANNEL(host, nick, name) ::=":<host> 442 * <nick> <name> :You're not on that channel"
 
 RPL_TOPIC(name, topic, host, nick) ::=":<host> 332 * <nick> <name> :<topic>"
+RPL_TOPICNL(name, topic, host, nick) ::=":<host> 332 * <nick> <name> :<topic><\n>"
 
-leave_channel(name) ::=" :Left <name>"
+leave_channel(name, host, nick) ::=":<host> 222 * <nick> PART <name>"
+
+RPL_NOTOPIC(name, host, nick) ::=  ":<host> 331 * <nick> <name> :No topic is set"

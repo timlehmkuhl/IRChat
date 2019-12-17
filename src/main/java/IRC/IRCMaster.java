@@ -196,27 +196,29 @@ public class IRCMaster {
         for (Channel c : channels) {
             if((c.getName().equals(channelName))) {
                flag = true;
+                channel = c;
+               break;
             }
         }
 
-        if(!flag){
+        if(!flag){  //neuer channel
            // ST st403 = templates.getInstanceOf("ERR_NOSUCHCHANNEL");
           //  return st403.add("name", channelName).render();
 
             Channel newChannel = new Channel(channelName, null);
+            channelUserList = new ArrayList<>();
             channels.add(newChannel);
             channelUserMap.put(newChannel.getName(), users);
             channel = newChannel;
-        }
-        channelUserList.add(sender);
-        channelUserMap.put(channelName, channelUserList);
 
-
-        for(Channel c : channels){
-            if(c.getName().equals(channelName))
-                channel = c;
-            break;
+            channelUserList.add(sender);
+            channelUserMap.put(channelName, channelUserList);
+        } else {
+            channelUserList = channelUserMap.get(channelName);
+            channelUserList.add(sender);
+            channelUserMap.put(channelName, channelUserList);
         }
+
         // User List
         String users = "";
             for(Map.Entry<String,List<User>> entry : channelUserMap.entrySet()){
@@ -227,18 +229,24 @@ public class IRCMaster {
                     }
                 }
             }
-        ST topicST = templates.getInstanceOf("RPL_TOPIC");
-        String topic = "";
-        if(channel.getTopic() != null)
-        topic = topicST.add("name", channelName).add("topic", channel.getTopic()).add("host", host).add("nick", sender.getNick()).render() + "\n";
+        ST topicST = templates.getInstanceOf("RPL_TOPICNL");
+
+
         ST j = templates.getInstanceOf("join");
         ST st353 = templates.getInstanceOf("RPL_NAMEREPLY");
         ST st366 = templates.getInstanceOf("RPL_ENDOFNAMES");
-        return j.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
-                + topic
-                + st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).add("users", users.trim()).render()
-                + st366.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render();
+        if(channel.getTopic() == null) {
+            return j.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
+                    + st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).add("users", users.trim()).render()
+                    + st366.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render();
+        } else{
+            return
+            j.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render()
+          +  topicST.add("name", channelName).add("topic", channel.getTopic()).add("host", host).add("nick", sender.getNick()).render()
+                    + st353.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).add("users", users.trim()).render()
+                    + st366.add("host", host).add("nick", sender.getNick()).add("name", channelName).add("user", sender.getName()).render();
 
+        }
     }
 
     /**
@@ -261,7 +269,7 @@ public class IRCMaster {
         }
 
         ST leave = templates.getInstanceOf("leave_channel");
-        user.sendMessage(leave.add("name", channel).render());
+        user.sendMessage(leave.add("name", channel).add("host", host).add("nick", user.getNick()).render());
         channelUserMap.get(channel).remove(user);
         if(channelUserMap.get(channel).isEmpty()) channelUserMap.remove(channel);
         return true;
@@ -276,16 +284,23 @@ public class IRCMaster {
      * @throws IOException
      */
     boolean setTopic(String channelName, String messsage, User sender) throws IOException {
+        if(messsage == null){
+            ST st331 = templates.getInstanceOf("RPL_NOTOPIC");
+            sender.sendMessage(st331.add("name", channelName).add("nick", sender.getNick()).add("host", host).render());
+            return true;
+        }
         for (Channel c : channels) {
             if (c.getName().equals(channelName)) {
                     c.setTopic(messsage);
                     ST st332 = templates.getInstanceOf("RPL_TOPIC");
-                    sender.sendMessage(st332.add("name", channelName).add("topic", messsage).render());
+                    sender.sendMessage(st332.add("name", channelName).add("topic", messsage).add("nick", sender.getNick()).add("host", host).render());
                     return true;
             }
         }
+
         ST st442 = templates.getInstanceOf("ERR_NOTONCHANNEL");
         sender.sendMessage(st442.add("name", channelName).add("host", host).add("nick", sender.getNick()).render());
+
         return false;
     }
 
