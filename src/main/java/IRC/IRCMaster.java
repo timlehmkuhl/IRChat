@@ -191,6 +191,8 @@ public class IRCMaster {
      */
     public String join(String channelName, User sender)  {
         boolean flag = false;
+        Channel channel = null;
+
         for (Channel c : channels) {
             if((c.getName().equals(channelName))) {
                flag = true;
@@ -201,14 +203,15 @@ public class IRCMaster {
            // ST st403 = templates.getInstanceOf("ERR_NOSUCHCHANNEL");
           //  return st403.add("name", channelName).render();
 
-            Channel gaming = new Channel(channelName, null);
-            channels.add(gaming);
-            channelUserMap.put(gaming.getName(), users);
+            Channel newChannel = new Channel(channelName, null);
+            channels.add(newChannel);
+            channelUserMap.put(newChannel.getName(), users);
+            channel = newChannel;
         }
         channelUserList.add(sender);
         channelUserMap.put(channelName, channelUserList);
 
-        Channel channel = null;
+
         for(Channel c : channels){
             if(c.getName().equals(channelName))
                 channel = c;
